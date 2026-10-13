@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VANA FORM — Architectural Prefab & Modular System</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0c0a09',
+              dark: '#1c1917',
+              card: '#262626',
+              border: '#3c3c3c',
+              gold: '#d97706',
+              goldLight: '#f59e0b',
+              leaf: '#4a6b53',
+              leafLight: '#638d6d',
+              sand: '#e7e5e4',
+              muted: '#a8a29e'
+            }
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Alpine JS for state management -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0c0a09;
+      color: #f5f5f4;
+      overflow-x: hidden;
+    }
+    
+    .font-serif {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1c1917;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #44403c;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d97706;
+    }
+
+    /* Print styles for quotations */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-quotation, #printable-quotation * {
+        visibility: visible;
+      }
+      #printable-quotation {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #000 !important;
+        background: #fff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Glassmorphism effects */
+    .glass-panel {
+      background: rgba(28, 25, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(217, 119, 6, 0.15);
+    }
+
+    .glass-card {
+      background: rgba(38, 38, 38, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(217, 119, 6, 0.4);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+
+<body x-data="vanaApp()" x-init="initApp()" class="min-h-screen flex flex-col justify-between selection:bg-amber-600 selection:text-white">
+
+  <!-- HEADER & NAVIGATION -->
+  <header class="sticky top-0 z-50 bg-stone-950/90 backdrop-blur-md border-b border-stone-800 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- BRAND LOGO -->
+      <a href="#" @click.prevent="activeTab = 'home'" class="flex items-center gap-3.5 group">
+        <!-- SVG Monogram Logo based on VF + House + Leaf -->
+        <div class="relative w-12 h-12 bg-stone-900 border border-stone-700/80 rounded-lg flex items-center justify-center p-1.5 group-hover:border-amber-500/80 transition-all duration-300 shadow-md">
+          <svg viewBox="0 0 120 120" class="w-full h-full">
+            <!-- V Path (Forest Green) -->
+            <path d="M 22,25 L 48,85 L 62,52" fill="none" stroke="#4a6b53" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- F Path (Muted Gold) -->
+            <path d="M 62,25 L 98,25 M 62,25 L 62,85 M 62,52 L 92,52" fill="none" stroke="#d97706" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Roof Gable -->
+            <path d="M 40,88 L 62,70 L 84,88" fill="none" stroke="#f5f5f4" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Leaf Accent -->
+            <path d="M 18,65 Q 10,50 22,38 Q 30,52 18,65 Z" fill="#638d6d" />
+            <path d="M 28,75 Q 18,62 28,52 Q 38,65 28,75 Z" fill="#4a6b53" />
+          </svg>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl font-light tracking-[0.22em] text-stone-100 font-serif font-bold">VANA</span>
+            <span class="text-xl font-light tracking-[0.22em] text-amber-500 font-sans font-medium">FORM</span>
+          </div>
+          <span class="text-[9px] tracking-[0.22em] text-stone-400 font-mono uppercase font-medium">
+            BY PRATYASA INTERIOR
+          </span>
+        </div>
+      </a>
+
+      <!-- DESKTOP NAVIGATION -->
+      <nav class="hidden md:flex items-center gap-7 text-xs uppercase tracking-widest font-mono">
+        <button @click="activeTab = 'home'" :class="activeTab === 'home' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Home</button>
+        <button @click="activeTab = 'products'" :class="activeTab === 'products' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Products</button>
+        <button @click="activeTab = 'gallery'" :class="activeTab === 'gallery' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Gallery</button>
+        <button @click="activeTab = 'materials'" :class="activeTab === 'materials' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Materials</button>
+        <button @click="activeTab = 'configurator'" :class="activeTab === 'configurator' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Configurator</button>
+        <button @click="activeTab = 'architecture'" :class="activeTab === 'architecture' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Tech Spec</button>
+        <button @click="activeTab = 'admin'" :class="activeTab === 'admin' ? 'text-amber-500 font-semibold border-b-2 border-amber-500 pb-1' : 'text-stone-300 hover:text-amber-400 pb-1 transition-colors'">Admin Portal</button>
+      </nav>
+
+      <!-- RIGHT ACTIONS -->
+      <div class="hidden lg:flex items-center gap-4">
+        <a :href="'https://wa.me/' + settings.whatsapp + '?text=Hello%20VANA%20FORM%20Team,%20I%20would%20like%20to%20inquire%20about%20prefabricated%20structures.'" target="_blank" class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-stone-900 border border-emerald-500/30 px-3 py-2 rounded-md hover:bg-emerald-950/40 transition-colors">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Direct Chat</span>
+        </a>
+        <button @click="activeTab = 'configurator'" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-medium px-4 py-2 rounded-md text-xs uppercase tracking-wider font-mono shadow-md transition-all duration-200">
+          Build Quote <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+
+      <!-- MOBILE MENU BUTTON -->
+      <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-stone-300 hover:text-white p-2">
+        <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark text-xl' : 'fa-bars text-xl'"></i>
+      </button>
+
+    </div>
+
+    <!-- MOBILE MENU DROPDOWN -->
+    <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-stone-900 border-b border-stone-800 px-4 py-6 space-y-4 text-sm font-mono uppercase tracking-wider">
+      <button @click="activeTab = 'home'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">Home</button>
+      <button @click="activeTab = 'products'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">Products</button>
+      <button @click="activeTab = 'gallery'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">Gallery Tab</button>
+      <button @click="activeTab = 'materials'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">Materials</button>
+      <button @click="activeTab = 'configurator'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">11-Step Configurator</button>
+      <button @click="activeTab = 'architecture'; mobileMenuOpen = false" class="block w-full text-left py-2 text-stone-200 hover:text-amber-400">Tech Spec & Database</button>
+      <button @click="activeTab = 'admin'; mobileMenuOpen = false" class="block w-full text-left py-2 text-amber-500 font-bold">Admin Portal</button>
+    </div>
+  </header>
+
+  <main class="flex-1">
+
+    <!-- ========================================== -->
+    <!-- 1. HOME TAB / HERO SECTION -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'home'" x-transition class="relative min-h-[88vh] flex items-center justify-center bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 overflow-hidden py-16">
+      
+      <!-- Background Ambient Glow -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-stone-950/80 to-stone-950 pointer-events-none"></div>
+      
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+        
+        <!-- Rate Update Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono mb-8 uppercase tracking-widest animate-pulse">
+          <i class="fa-solid fa-sparkles text-xs"></i>
+          <span>Updated Rates 2026 — Base Rate & Options Refreshed (+10%)</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-serif font-light text-stone-100 tracking-tight leading-tight max-w-5xl mx-auto">
+          Precision Engineered <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 font-normal">A-Frame & Prefab Structures</span>
+        </h1>
+
+        <p class="mt-6 text-stone-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          Crafted by <strong class="text-stone-200 font-medium">Pratyasa Interior</strong> in Ahmedabad, Gujarat. Heavy-duty galvanized steel framing, factory-fitted insulation, thermal glass façades, and turnkey luxury interiors built for eco-resorts, private estates, and luxury retreats across India.
+        </p>
+
+        <!-- Dynamic Quick Stats -->
+        <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
+          <div class="glass-card p-4 rounded-lg">
+            <p class="text-xs font-mono text-stone-400 uppercase tracking-wider">A-Frame Baseline</p>
+            <p class="text-xl font-bold text-amber-400 mt-1 font-mono">₹13,14,500 <span class="text-[10px] text-stone-400 font-normal">+GST</span></p>
+            <p class="text-[10px] text-stone-400 mt-0.5">300 SQ.FT Base Model</p>
+          </div>
+
+          <div class="glass-card p-4 rounded-lg">
+            <p class="text-xs font-mono text-stone-400 uppercase tracking-wider">Assembly Time</p>
+            <p class="text-xl font-bold text-emerald-400 mt-1 font-mono">21 to 30 Days</p>
+            <p class="text-[10px] text-stone-400 mt-0.5">Rapid Site Erection</p>
+          </div>
+
+          <div class="glass-card p-4 rounded-lg">
+            <p class="text-xs font-mono text-stone-400 uppercase tracking-wider">Structure Lifespan</p>
+            <p class="text-xl font-bold text-stone-200 mt-1 font-mono">50+ Years</p>
+            <p class="text-[10px] text-stone-400 mt-0.5">IS-800 Steel Grade</p>
+          </div>
+
+          <div class="glass-card p-4 rounded-lg">
+            <p class="text-xs font-mono text-stone-400 uppercase tracking-wider">Location Head Office</p>
+            <p class="text-xl font-bold text-amber-400 mt-1 font-mono">Ahmedabad</p>
+            <p class="text-[10px] text-stone-400 mt-0.5">Gujarat, India</p>
+          </div>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <button @click="activeTab = 'configurator'" class="bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold px-8 py-4 rounded-lg text-sm uppercase tracking-wider font-mono transition-all shadow-lg hover:shadow-amber-600/20">
+            <i class="fa-solid fa-sliders mr-2"></i> Launch 11-Step Configurator
+          </button>
+          <button @click="activeTab = 'gallery'" class="bg-stone-900 border border-stone-700 hover:border-amber-500/50 text-stone-200 px-8 py-4 rounded-lg text-sm uppercase tracking-wider font-mono transition-all">
+            <i class="fa-solid fa-images mr-2"></i> View Photo Gallery
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 2. PRODUCTS CATALOG TAB -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'products'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <p class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em] mb-2">ARCHITECTURAL PREFAB RANGE</p>
+        <h2 class="text-3xl md:text-5xl font-serif font-light text-stone-100">PRODUCT CATALOGUE</h2>
+        <p class="text-stone-400 mt-4 text-sm md:text-base">
+          All baseline prices reflect updated 2026 material and factory schedules (+10% adjusted). Custom modifications available via our configurator.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <template x-for="product in products" :key="product.id">
+          <div class="glass-card rounded-xl overflow-hidden border border-stone-800 flex flex-col justify-between group">
+            
+            <div class="relative h-64 overflow-hidden">
+              <img :src="product.image" :alt="product.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div class="absolute top-3 right-3 bg-stone-950/80 backdrop-blur-md px-3 py-1 rounded text-xs font-mono text-amber-400 border border-amber-500/30">
+                <span x-text="product.category"></span>
+              </div>
+              <div class="absolute bottom-3 left-3 bg-stone-950/80 backdrop-blur-md px-3 py-1 rounded text-xs font-mono text-stone-300">
+                <i class="fa-solid fa-vector-square mr-1"></i> <span x-text="product.sizeSqft + ' SQ.FT'"></span>
+              </div>
+            </div>
+
+            <div class="p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-serif text-white font-medium" x-text="product.name"></h3>
+                <p class="text-stone-400 text-xs mt-2 line-clamp-2 leading-relaxed" x-text="product.description"></p>
+                
+                <div class="mt-4 pt-4 border-t border-stone-800/80 space-y-1.5 text-xs text-stone-300">
+                  <div class="flex justify-between">
+                    <span class="text-stone-400 font-mono">Structure Height:</span>
+                    <span class="font-medium" x-text="product.peakHeight + ' Peak'"></span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-stone-400 font-mono">Suggested Layout:</span>
+                    <span class="font-medium" x-text="product.layout"></span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-stone-400 font-mono">Rate / Sq.Ft:</span>
+                    <span class="font-medium text-amber-400 font-mono" x-text="'₹' + product.pricePerSqft.toLocaleString('en-IN')"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-stone-800 flex items-center justify-between">
+                <div>
+                  <p class="text-[10px] text-stone-400 font-mono uppercase">Starting Base Price</p>
+                  <p class="text-lg font-bold text-amber-400 font-mono" x-text="formatINR(product.startingPrice)"></p>
+                  <p class="text-[9px] text-stone-400 font-mono">+18% GST Applicable</p>
+                </div>
+
+                <button @click="startCustomizing(product)" class="bg-amber-600/20 hover:bg-amber-600 text-amber-400 hover:text-stone-950 border border-amber-500/40 px-4 py-2 rounded text-xs font-mono font-medium transition-all">
+                  Configure <i class="fa-solid fa-sliders ml-1"></i>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </template>
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 3. PHOTO GALLERY TAB (NEW FEATURE) -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'gallery'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <p class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em] mb-2">VISUAL PORTFOLIO & ARCHITECTURE</p>
+        <h2 class="text-3xl md:text-5xl font-serif font-light text-stone-100">PHOTO GALLERY</h2>
+        <p class="text-stone-400 mt-4 text-sm md:text-base">
+          Explore real execution photos, modular frame assemblies, interior detailing, and completed resort sites delivered by Pratyasa Interior.
+        </p>
+      </div>
+
+      <!-- Gallery Category Filters -->
+      <div class="flex flex-wrap justify-center gap-2 mb-10 font-mono text-xs">
+        <template x-for="cat in galleryCategories" :key="cat">
+          <button 
+            @click="activeGalleryCat = cat" 
+            :class="activeGalleryCat === cat ? 'bg-amber-600 text-stone-950 font-bold shadow-md' : 'bg-stone-900 text-stone-300 hover:bg-stone-800 border border-stone-800'"
+            class="px-4 py-2 rounded-md uppercase tracking-wider transition-all"
+            x-text="cat"
+          ></button>
+        </template>
+      </div>
+
+      <!-- Gallery Photo Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="item in filteredGallery" :key="item.id">
+          <div 
+            @click="openGalleryModal(item)"
+            class="group relative h-80 bg-stone-900 rounded-xl overflow-hidden border border-stone-800 hover:border-amber-500/60 transition-all cursor-pointer shadow-lg"
+          >
+            <img :src="item.image" :alt="item.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            
+            <!-- Overlay Info -->
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+              <span class="text-amber-400 font-mono text-[10px] uppercase tracking-widest font-semibold" x-text="item.category"></span>
+              <h3 class="text-white text-lg font-serif font-medium mt-1" x-text="item.title"></h3>
+              <p class="text-stone-300 text-xs mt-1 line-clamp-2" x-text="item.caption"></p>
+              <div class="mt-3 flex items-center text-xs text-amber-400 font-mono">
+                <span>View High Resolution</span>
+                <i class="fa-solid fa-expand ml-2 text-xs"></i>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Gallery Image Lightbox Modal -->
+      <div x-show="galleryModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" @keydown.escape.window="galleryModalOpen = false">
+        <div class="relative max-w-4xl w-full bg-stone-900 border border-stone-800 rounded-xl overflow-hidden shadow-2xl">
+          
+          <button @click="galleryModalOpen = false" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-stone-950/80 text-stone-200 hover:text-white flex items-center justify-center border border-stone-700">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+
+          <template x-if="selectedGalleryItem">
+            <div>
+              <div class="max-h-[65vh] overflow-hidden bg-black flex items-center justify-center">
+                <img :src="selectedGalleryItem.image" :alt="selectedGalleryItem.title" class="max-h-[65vh] w-auto object-contain" />
+              </div>
+              <div class="p-6 bg-stone-900 border-t border-stone-800">
+                <div class="flex items-center justify-between">
+                  <span class="text-amber-500 font-mono text-xs uppercase tracking-widest" x-text="selectedGalleryItem.category"></span>
+                  <span class="text-stone-400 font-mono text-xs" x-text="'Location: ' + selectedGalleryItem.location"></span>
+                </div>
+                <h3 class="text-2xl font-serif text-white font-medium mt-1" x-text="selectedGalleryItem.title"></h3>
+                <p class="text-stone-300 text-sm mt-2 leading-relaxed" x-text="selectedGalleryItem.caption"></p>
+              </div>
+            </div>
+          </template>
+
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 4. MATERIALS & SPECS TAB -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'materials'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <p class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em] mb-2">FACTORY CRAFTSMANSHIP</p>
+        <h2 class="text-3xl md:text-5xl font-serif font-light text-stone-100">MATERIALS & ENGINEERING</h2>
+        <p class="text-stone-400 mt-4 text-sm md:text-base">
+          Built to resist extreme weather, high wind pressures (up to 180 km/h), seismic forces, and high moisture environments.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <div class="glass-card p-6 rounded-xl border border-stone-800">
+          <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mb-4">
+            <i class="fa-solid fa-cubes-stacked"></i>
+          </div>
+          <h3 class="text-xl font-serif text-white font-medium">Structural Steel Skeleton</h3>
+          <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+            IS-800 certified heavy-duty tubular hollow sections with zinc-chromate primer and dual polyurethane protective coatings to ensure zero rust for 50+ years.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-stone-800">
+          <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl mb-4">
+            <i class="fa-solid fa-temperature-arrow-down"></i>
+          </div>
+          <h3 class="text-xl font-serif text-white font-medium">Thermal & Acoustic Insulation</h3>
+          <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+            50mm to 100mm high-density Rockwool / Glasswool insulation encapsulated within vapor barrier membranes for round-the-year indoor temperature comfort.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-stone-800">
+          <div class="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mb-4">
+            <i class="fa-solid fa-window-maximize"></i>
+          </div>
+          <h3 class="text-xl font-serif text-white font-medium">Thermal Glazed Façades</h3>
+          <p class="text-stone-400 text-xs mt-2 leading-relaxed">
+            Double glazed toughened Low-E glass units mounted in heavy architectural aluminium profiles with EPDM weather-seal gaskets.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 5. 11-STEP DYNAMIC PRODUCT CONFIGURATOR -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'configurator'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between border-b border-stone-800 pb-6">
+        <div>
+          <span class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em]">Interactive Estimator</span>
+          <h2 class="text-2xl md:text-4xl font-serif font-light text-stone-100">11-STEP CONFIGURATOR</h2>
+        </div>
+
+        <!-- Step Indicator Pill -->
+        <div class="mt-4 md:mt-0 flex items-center gap-3">
+          <span class="text-xs font-mono text-stone-400">Step <strong class="text-amber-400 text-sm" x-text="configStep"></strong> of 11</span>
+          <div class="w-36 h-2 bg-stone-800 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-300" :style="'width: ' + ((configStep / 11) * 100) + '%'"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- MAIN CONFIGURATOR STEPS (Left 8 Cols) -->
+        <div class="lg:col-col-span-8 lg:col-span-8 space-y-6">
+          
+          <!-- STEP 1: Size & Base Footprint -->
+          <div x-show="configStep === 1" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">1. Select Structure Size & Footprint</h3>
+            <p class="text-xs text-stone-400">Base rate updated with 2026 material schedule (+10%).</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.size" :key="opt.id">
+                <div 
+                  @click="configSelection.size = opt.id; recalculateTotal()" 
+                  :class="configSelection.size === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div class="flex justify-between items-center">
+                      <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                      <span class="text-xs font-mono text-amber-400 font-bold" x-text="formatINR(opt.basePrice)"></span>
+                    </div>
+                    <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                  </div>
+                  <div class="mt-3 text-[10px] font-mono text-stone-400 flex justify-between pt-2 border-t border-stone-800">
+                    <span x-text="'Footprint: ' + opt.sqft + ' SQ.FT'"></span>
+                    <span x-text="'Rate: ₹' + opt.ratePerSqft + '/sqft'"></span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 2: Peak Height -->
+          <div x-show="configStep === 2" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">2. Select Structure Height & Peak Pitch</h3>
+            <p class="text-xs text-stone-400">Higher peaks allow mezzanine floor installation and dramatic vertical glazing.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.peakHeight" :key="opt.id">
+                <div 
+                  @click="configSelection.peakHeight = opt.id; recalculateTotal()"
+                  :class="configSelection.peakHeight === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <div class="flex justify-between">
+                    <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                    <span class="text-xs font-mono text-amber-400" x-text="opt.priceAdd === 0 ? 'Included' : '+' + formatINR(opt.priceAdd)"></span>
+                  </div>
+                  <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 3: Bedroom Layout -->
+          <div x-show="configStep === 3" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">3. Bedroom & Mezzanine Configuration</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="opt in configOptions.bedroom" :key="opt.id">
+                <div 
+                  @click="configSelection.bedroom = opt.id; recalculateTotal()"
+                  :class="configSelection.bedroom === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <span class="font-serif text-white font-medium block" x-text="opt.label"></span>
+                  <span class="text-xs font-mono text-amber-400 mt-1 block" x-text="opt.priceAdd === 0 ? 'Standard' : '+' + formatINR(opt.priceAdd)"></span>
+                  <p class="text-xs text-stone-400 mt-2" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 4: Bathrooms -->
+          <div x-show="configStep === 4" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">4. Bathroom Quantity</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.bathroom" :key="opt.id">
+                <div 
+                  @click="configSelection.bathroom = opt.id; recalculateTotal()"
+                  :class="configSelection.bathroom === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <div class="flex justify-between">
+                    <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                    <span class="text-xs font-mono text-amber-400" x-text="opt.priceAdd === 0 ? 'Included' : '+' + formatINR(opt.priceAdd)"></span>
+                  </div>
+                  <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 5: Exterior Cladding -->
+          <div x-show="configStep === 5" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">5. Exterior Wall Cladding & Roof Finishes</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="opt in configOptions.exterior" :key="opt.id">
+                <div 
+                  @click="configSelection.exterior = opt.id; recalculateTotal()"
+                  :class="configSelection.exterior === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <span class="font-serif text-white font-medium block" x-text="opt.label"></span>
+                  <span class="text-xs font-mono text-amber-400 mt-1 block" x-text="opt.priceAdd === 0 ? 'Included' : '+' + formatINR(opt.priceAdd)"></span>
+                  <p class="text-xs text-stone-400 mt-2" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 6: Interior Finish -->
+          <div x-show="configStep === 6" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">6. Interior Wall Paneling & Woodwork</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="opt in configOptions.interior" :key="opt.id">
+                <div 
+                  @click="configSelection.interior = opt.id; recalculateTotal()"
+                  :class="configSelection.interior === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <span class="font-serif text-white font-medium block" x-text="opt.label"></span>
+                  <span class="text-xs font-mono text-amber-400 mt-1 block" x-text="opt.priceAdd === 0 ? 'Standard' : '+' + formatINR(opt.priceAdd)"></span>
+                  <p class="text-xs text-stone-400 mt-2" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 7: Glass Façade -->
+          <div x-show="configStep === 7" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">7. Front & Rear Glazing Systems</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.glazing" :key="opt.id">
+                <div 
+                  @click="configSelection.glazing = opt.id; recalculateTotal()"
+                  :class="configSelection.glazing === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <div class="flex justify-between">
+                    <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                    <span class="text-xs font-mono text-amber-400" x-text="opt.priceAdd === 0 ? 'Included' : '+' + formatINR(opt.priceAdd)"></span>
+                  </div>
+                  <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 8: Kitchenette -->
+          <div x-show="configStep === 8" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">8. Modular Kitchenette Package</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="opt in configOptions.kitchen" :key="opt.id">
+                <div 
+                  @click="configSelection.kitchen = opt.id; recalculateTotal()"
+                  :class="configSelection.kitchen === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <span class="font-serif text-white font-medium block" x-text="opt.label"></span>
+                  <span class="text-xs font-mono text-amber-400 mt-1 block" x-text="opt.priceAdd === 0 ? 'None' : '+' + formatINR(opt.priceAdd)"></span>
+                  <p class="text-xs text-stone-400 mt-2" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 9: Sanitary Fittings -->
+          <div x-show="configStep === 9" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">9. Bathroom Fixtures & Sanitaryware</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.sanitary" :key="opt.id">
+                <div 
+                  @click="configSelection.sanitary = opt.id; recalculateTotal()"
+                  :class="configSelection.sanitary === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <div class="flex justify-between">
+                    <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                    <span class="text-xs font-mono text-amber-400" x-text="opt.priceAdd === 0 ? 'Standard' : '+' + formatINR(opt.priceAdd)"></span>
+                  </div>
+                  <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 10: Electrical & AC -->
+          <div x-show="configStep === 10" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">10. Electrical & Smart Home Integration</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="opt in configOptions.electrical" :key="opt.id">
+                <div 
+                  @click="configSelection.electrical = opt.id; recalculateTotal()"
+                  :class="configSelection.electrical === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <div class="flex justify-between">
+                    <span class="font-serif text-white font-medium" x-text="opt.label"></span>
+                    <span class="text-xs font-mono text-amber-400" x-text="opt.priceAdd === 0 ? 'Basic' : '+' + formatINR(opt.priceAdd)"></span>
+                  </div>
+                  <p class="text-xs text-stone-400 mt-1" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP 11: Turnkey Furnishing -->
+          <div x-show="configStep === 11" class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+            <h3 class="text-lg font-serif text-amber-400 font-medium">11. Turnkey Furniture & Interior Decor</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="opt in configOptions.furniture" :key="opt.id">
+                <div 
+                  @click="configSelection.furniture = opt.id; recalculateTotal()"
+                  :class="configSelection.furniture === opt.id ? 'border-amber-500 bg-amber-950/30 ring-1 ring-amber-500' : 'border-stone-800 bg-stone-900/60 hover:border-stone-700'"
+                  class="p-4 rounded-lg border cursor-pointer transition-all"
+                >
+                  <span class="font-serif text-white font-medium block" x-text="opt.label"></span>
+                  <span class="text-xs font-mono text-amber-400 mt-1 block" x-text="opt.priceAdd === 0 ? 'Unfurnished' : '+' + formatINR(opt.priceAdd)"></span>
+                  <p class="text-xs text-stone-400 mt-2" x-text="opt.desc"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- STEP CONTROLS (Back / Next Buttons) -->
+          <div class="flex items-center justify-between pt-4">
+            <button 
+              @click="if(configStep > 1) configStep--" 
+              :disabled="configStep === 1"
+              :class="configStep === 1 ? 'opacity-40 cursor-not-allowed bg-stone-900' : 'bg-stone-900 hover:bg-stone-800 text-stone-200'"
+              class="px-5 py-2.5 rounded-lg border border-stone-800 font-mono text-xs uppercase tracking-wider"
+            >
+              <i class="fa-solid fa-chevron-left mr-2"></i> Previous Step
+            </button>
+
+            <button 
+              x-show="configStep < 11"
+              @click="configStep++" 
+              class="bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold px-6 py-2.5 rounded-lg font-mono text-xs uppercase tracking-wider transition-all shadow-md"
+            >
+              Next Step <i class="fa-solid fa-chevron-right ml-2"></i>
+            </button>
+
+            <button 
+              x-show="configStep === 11"
+              @click="generateQuotationModal()" 
+              class="bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-6 py-2.5 rounded-lg font-mono text-xs uppercase tracking-wider transition-all shadow-md"
+            >
+              Generate Instant Official Quote <i class="fa-solid fa-file-invoice-dollar ml-2"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- RIGHT SIDE HUD: LIVE ESTIMATE BREAKDOWN -->
+        <div class="lg:col-span-4 sticky top-24">
+          <div class="glass-card p-6 rounded-xl border border-amber-500/30 space-y-5">
+            
+            <div class="flex items-center justify-between border-b border-stone-800 pb-4">
+              <span class="font-mono text-xs uppercase tracking-widest text-amber-500">Live Price Engine</span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">2026 Schedule</span>
+            </div>
+
+            <!-- Price Breakdown Summary -->
+            <div class="space-y-2.5 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-stone-400">Base Structure:</span>
+                <span class="text-stone-200" x-text="formatINR(calculatedPrice.base)"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-stone-400">Upgrades & Addons:</span>
+                <span class="text-amber-400" x-text="'+' + formatINR(calculatedPrice.addons)"></span>
+              </div>
+              <div class="flex justify-between pt-2 border-t border-stone-800 font-medium">
+                <span class="text-stone-300">Subtotal Excl. Tax:</span>
+                <span class="text-stone-100" x-text="formatINR(calculatedPrice.subtotal)"></span>
+              </div>
+              <div class="flex justify-between text-stone-400">
+                <span>GST @ 18%:</span>
+                <span x-text="formatINR(calculatedPrice.gst)"></span>
+              </div>
+              
+              <div class="pt-3 border-t border-amber-500/40">
+                <p class="text-[10px] text-stone-400 uppercase tracking-widest">Total Estimated Value</p>
+                <p class="text-2xl font-bold font-mono text-amber-400 mt-0.5" x-text="formatINR(calculatedPrice.total)"></p>
+                <p class="text-[9px] text-stone-400 mt-1">Ex-factory Ahmedabad. Freight dynamically quoted on location.</p>
+              </div>
+            </div>
+
+            <!-- Quick Action Links -->
+            <div class="space-y-2 pt-2">
+              <button @click="generateQuotationModal()" class="w-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-3 rounded-lg text-xs uppercase tracking-wider font-mono transition-all">
+                View Full Breakdown Quote
+              </button>
+              
+              <a :href="getWhatsAppQuoteLink()" target="_blank" class="w-full flex items-center justify-center gap-2 bg-emerald-950/80 border border-emerald-500/40 hover:bg-emerald-900 text-emerald-300 font-medium py-2.5 rounded-lg text-xs font-mono transition-all">
+                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Quote To Sales
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 6. TECH SPEC & DB ARCHITECTURE GUIDE TAB -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'architecture'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <div class="mb-8 border-b border-stone-800 pb-6">
+        <span class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em]">System Architecture & Developer Docs</span>
+        <h2 class="text-2xl md:text-4xl font-serif font-light text-stone-100">NEXT.JS 14 & SUPABASE ARCHITECTURE</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Folder Tree Structure -->
+        <div class="glass-card p-6 rounded-xl border border-stone-800 font-mono text-xs space-y-4">
+          <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider border-b border-stone-800 pb-2">Production Next.js Project Structure</h3>
+          <pre class="text-stone-300 overflow-x-auto leading-relaxed">
+vana-form-web/
+├── app/
+│   ├── layout.tsx                # Root layout with Tailwind dark theme & fonts
+│   ├── page.tsx                  # Landing / Showcase Hero page
+│   ├── products/
+│   │   └── page.tsx              # Dynamic SSG/ISR Products catalog
+│   ├── gallery/
+│   │   └── page.tsx              # Photo Gallery with filter ISR
+│   ├── configurator/
+│   │   └── page.tsx              # 11-Step Interactive pricing engine
+│   ├── admin/
+│   │   ├── page.tsx              # Admin Lead CRM & KPI Dashboard
+│   │   └── settings/page.tsx     # CMS & Pricing rules editor
+│   └── api/
+│       ├── quote/route.ts        # Dynamic PDF & DB Lead insertion
+│       └── whatsapp/route.ts     # Pre-filled chat builder
+├── lib/
+│   ├── supabase/client.ts       # Supabase JS Client initialization
+│   └── pricing-engine.ts        # Server-side pricing recalculation rules
+├── public/
+│   └── images/
+│       └── logo.png              # VANA FORM Logo Identity
+└── supabase/
+    └── schema.sql                # RLS Policies, Tables & Seed Data
+          </pre>
+        </div>
+
+        <!-- SQL Schema with RLS -->
+        <div class="glass-card p-6 rounded-xl border border-stone-800 font-mono text-xs space-y-4">
+          <div class="flex justify-between items-center border-b border-stone-800 pb-2">
+            <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">PostgreSQL / Supabase Schema</h3>
+            <button @click="copySQLSchema()" class="text-[10px] bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded">
+              <i class="fa-regular fa-copy mr-1"></i> Copy SQL
+            </button>
+          </div>
+          <textarea readonly class="w-full h-80 bg-stone-950 text-stone-300 border border-stone-800 p-3 rounded font-mono text-[11px] leading-relaxed resize-none" x-text="sqlSchemaCode"></textarea>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 7. ADMIN PANEL / CMS DASHBOARD -->
+    <!-- ========================================== -->
+    <section x-show="activeTab === 'admin'" x-transition class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-800 pb-6 gap-4">
+        <div>
+          <span class="text-amber-500 font-mono text-xs uppercase tracking-[0.25em]">CMS & Operations Control</span>
+          <h2 class="text-2xl md:text-4xl font-serif font-light text-stone-100">ADMINISTRATIVE DASHBOARD</h2>
+        </div>
+
+        <!-- Admin Navigation Tabs -->
+        <div class="flex gap-2 font-mono text-xs">
+          <button @click="adminSubTab = 'kpis'" :class="adminSubTab === 'kpis' ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-900 text-stone-400 border border-stone-800'" class="px-3 py-1.5 rounded uppercase">CRM Leads</button>
+          <button @click="adminSubTab = 'products'" :class="adminSubTab === 'products' ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-900 text-stone-400 border border-stone-800'" class="px-3 py-1.5 rounded uppercase">Products</button>
+          <button @click="adminSubTab = 'rules'" :class="adminSubTab === 'rules' ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-900 text-stone-400 border border-stone-800'" class="px-3 py-1.5 rounded uppercase">Pricing Rules (+10%)</button>
+          <button @click="adminSubTab = 'settings'" :class="adminSubTab === 'settings' ? 'bg-amber-600 text-stone-950 font-bold' : 'bg-stone-900 text-stone-400 border border-stone-800'" class="px-3 py-1.5 rounded uppercase">Site Settings</button>
+        </div>
+      </div>
+
+      <!-- ADMIN SUBTAB 1: CRM LEADS & KPIS -->
+      <div x-show="adminSubTab === 'kpis'" class="space-y-6">
+        
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="glass-card p-5 rounded-xl border border-stone-800">
+            <span class="text-xs font-mono text-stone-400 uppercase">Active Enquiries</span>
+            <p class="text-3xl font-bold font-mono text-white mt-1">28</p>
+            <span class="text-[10px] text-emerald-400 font-mono mt-1 block"><i class="fa-solid fa-arrow-trend-up"></i> +14% this month</span>
+          </div>
+
+          <div class="glass-card p-5 rounded-xl border border-stone-800">
+            <span class="text-xs font-mono text-stone-400 uppercase">Quotes Generated</span>
+            <p class="text-3xl font-bold font-mono text-amber-400 mt-1">114</p>
+            <span class="text-[10px] text-stone-400 font-mono mt-1 block">Avg ₹18.5 L value</span>
+          </div>
+
+          <div class="glass-card p-5 rounded-xl border border-stone-800">
+            <span class="text-xs font-mono text-stone-400 uppercase">Pipeline Value</span>
+            <p class="text-3xl font-bold font-mono text-emerald-400 mt-1">₹2.1 Crs</p>
+            <span class="text-[10px] text-emerald-400 font-mono mt-1 block">Refreshed for 2026</span>
+          </div>
+
+          <div class="glass-card p-5 rounded-xl border border-stone-800">
+            <span class="text-xs font-mono text-stone-400 uppercase">Lead Conversion</span>
+            <p class="text-3xl font-bold font-mono text-stone-200 mt-1">22.4%</p>
+            <span class="text-[10px] text-stone-400 font-mono mt-1 block">Ahmedabad & Gujarat</span>
+          </div>
+        </div>
+
+        <!-- CRM Lead Table -->
+        <div class="glass-card rounded-xl border border-stone-800 overflow-hidden">
+          <div class="p-4 border-b border-stone-800 flex justify-between items-center">
+            <h3 class="font-serif text-stone-200 font-medium text-base">Recent Customer Quotation Enquiries</h3>
+            <span class="text-xs font-mono text-amber-500">Auto Sync enabled</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-stone-900/80 text-stone-400 border-b border-stone-800 uppercase">
+                <tr>
+                  <th class="p-3">Ref Code</th>
+                  <th class="p-3">Client Name</th>
+                  <th class="p-3">Location</th>
+                  <th class="p-3">Structure</th>
+                  <th class="p-3">Amount</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-800/60 text-stone-300">
+                <template x-for="lead in mockLeads" :key="lead.id">
+                  <tr class="hover:bg-stone-900/40 transition-colors">
+                    <td class="p-3 text-amber-400 font-bold" x-text="lead.ref"></td>
+                    <td class="p-3 font-sans font-medium text-white" x-text="lead.name"></td>
+                    <td class="p-3" x-text="lead.location"></td>
+                    <td class="p-3" x-text="lead.structure"></td>
+                    <td class="p-3 text-amber-400 font-bold" x-text="formatINR(lead.amount)"></td>
+                    <td class="p-3">
+                      <span :class="lead.status === 'Approved' ? 'bg-emerald-950 text-emerald-400 border-emerald-500/40' : 'bg-amber-950 text-amber-400 border-amber-500/40'" class="px-2 py-0.5 rounded border text-[10px]" x-text="lead.status"></span>
+                    </td>
+                    <td class="p-3 text-right space-x-2">
+                      <button @click="openWhatsAppForLead(lead)" class="text-emerald-400 hover:text-emerald-300"><i class="fa-brands fa-whatsapp text-sm"></i></button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ADMIN SUBTAB 2: PRODUCT CATALOG MANAGEMENT -->
+      <div x-show="adminSubTab === 'products'" class="space-y-6">
+        <div class="glass-card p-6 rounded-xl border border-stone-800">
+          <h3 class="text-lg font-serif text-white font-medium mb-4">Manage Product Models & Base Rates (+10% Included)</h3>
+          
+          <div class="space-y-4">
+            <template x-for="(p, index) in products" :key="p.id">
+              <div class="p-4 bg-stone-900 border border-stone-800 rounded-lg grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                <div>
+                  <label class="text-[10px] font-mono text-stone-400 uppercase">Product Name</label>
+                  <input type="text" x-model="p.name" class="w-full bg-stone-950 border border-stone-700 rounded px-2.5 py-1.5 text-xs text-white mt-1">
+                </div>
+
+                <div>
+                  <label class="text-[10px] font-mono text-stone-400 uppercase">Base Price (₹)</label>
+                  <input type="number" x-model.number="p.startingPrice" @input="recalculateTotal()" class="w-full bg-stone-950 border border-stone-700 rounded px-2.5 py-1.5 text-xs text-amber-400 font-mono font-bold mt-1">
+                </div>
+
+                <div>
+                  <label class="text-[10px] font-mono text-stone-400 uppercase">Rate Per Sq.Ft (₹)</label>
+                  <input type="number" x-model.number="p.pricePerSqft" class="w-full bg-stone-950 border border-stone-700 rounded px-2.5 py-1.5 text-xs text-stone-200 font-mono mt-1">
+                </div>
+
+                <div class="flex items-center gap-2 pt-4">
+                  <span class="text-[10px] font-mono text-emerald-400"><i class="fa-solid fa-check"></i> 10% Rate Applied</span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN SUBTAB 3: PRICING RULES ENGINE -->
+      <div x-show="adminSubTab === 'rules'" class="space-y-6">
+        <div class="glass-card p-6 rounded-xl border border-stone-800 space-y-4">
+          <h3 class="text-lg font-serif text-white font-medium">Pricing Formula Rules & Rates Manager</h3>
+          <p class="text-xs text-stone-400">Modify global multipliers. Updates propagate dynamically into the client configurator.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+            <div class="bg-stone-900 p-4 rounded border border-stone-800">
+              <label class="text-stone-400 block mb-1">Standard GST Tax Rate (%)</label>
+              <input type="number" x-model.number="settings.gstPercent" @input="recalculateTotal()" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-amber-400 font-bold">
+            </div>
+
+            <div class="bg-stone-900 p-4 rounded border border-stone-800">
+              <label class="text-stone-400 block mb-1">Mezzanine Floor Surcharge (₹)</label>
+              <input type="number" x-model.number="configOptions.bedroom[1].priceAdd" @input="recalculateTotal()" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-stone-200">
+            </div>
+
+            <div class="bg-stone-900 p-4 rounded border border-stone-800">
+              <label class="text-stone-400 block mb-1">Modular Kitchenette Base (₹)</label>
+              <input type="number" x-model.number="configOptions.kitchen[1].priceAdd" @input="recalculateTotal()" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-stone-200">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN SUBTAB 4: SITE SETTINGS -->
+      <div x-show="adminSubTab === 'settings'" class="space-y-6">
+        <div class="glass-card p-6 rounded-xl border border-stone-800 max-w-2xl space-y-4 font-mono text-xs">
+          <h3 class="text-lg font-serif text-white font-medium">Company Identity & Contact Info</h3>
+
+          <div>
+            <label class="text-stone-400 block mb-1">Company Name</label>
+            <input type="text" x-model="settings.companyName" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-white">
+          </div>
+
+          <div>
+            <label class="text-stone-400 block mb-1">Subtitle / Sub-brand</label>
+            <input type="text" x-model="settings.subtitle" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-stone-300">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-stone-400 block mb-1">WhatsApp Mobile</label>
+              <input type="text" x-model="settings.whatsapp" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-emerald-400">
+            </div>
+            <div>
+              <label class="text-stone-400 block mb-1">Location City</label>
+              <input type="text" x-model="settings.location" class="w-full bg-stone-950 border border-stone-700 rounded p-2 text-stone-300">
+            </div>
+          </div>
+
+          <button @click="showToast('Website settings saved successfully!')" class="bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold px-6 py-2 rounded text-xs uppercase font-mono">
+            Save Settings
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ========================================== -->
+  <!-- OFFICIAL QUOTATION PRINTABLE MODAL -->
+  <!-- ========================================== -->
+  <div x-show="quoteModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto" @keydown.escape.window="quoteModalOpen = false">
+    <div class="relative max-w-3xl w-full bg-stone-900 border border-stone-700 rounded-xl overflow-hidden shadow-2xl my-8">
+      
+      <!-- Modal Header Bar -->
+      <div class="no-print bg-stone-950 p-4 border-b border-stone-800 flex items-center justify-between">
+        <span class="text-amber-500 font-mono text-xs uppercase tracking-widest"><i class="fa-solid fa-file-invoice"></i> Official Quotation Generator</span>
+        <div class="flex items-center gap-3">
+          <button @click="printQuotation()" class="bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold px-3 py-1.5 rounded text-xs font-mono uppercase">
+            <i class="fa-solid fa-print mr-1"></i> Print / Save PDF
+          </button>
+          <button @click="quoteModalOpen = false" class="text-stone-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- PRINTABLE DOCUMENT BODY -->
+      <div id="printable-quotation" class="p-8 bg-stone-900 text-stone-100 font-sans space-y-6">
+        
+        <!-- Header / Logo Banner -->
+        <div class="flex justify-between items-start border-b border-stone-800 pb-6">
+          <div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-stone-950 border border-stone-700 rounded flex items-center justify-center p-1">
+                <svg viewBox="0 0 120 120" class="w-full h-full">
+                  <path d="M 22,25 L 48,85 L 62,52" fill="none" stroke="#4a6b53" stroke-width="11" />
+                  <path d="M 62,25 L 98,25 M 62,25 L 62,85 M 62,52 L 92,52" fill="none" stroke="#d97706" stroke-width="10" />
+                </svg>
+              </div>
+              <div>
+                <h1 class="text-2xl font-serif font-bold text-stone-100 tracking-widest">VANA FORM</h1>
+                <p class="text-[9px] font-mono text-amber-500 uppercase tracking-widest">BY PRATYASA INTERIOR</p>
+              </div>
+            </div>
+            <p class="text-xs text-stone-400 mt-2 font-mono" x-text="settings.location + ', India | GSTIN: 24AAACV9821K1Z5'"></p>
+          </div>
+
+          <div class="text-right font-mono text-xs">
+            <p class="text-amber-400 font-bold" x-text="'REF: ' + activeQuoteRef"></p>
+            <p class="text-stone-400 mt-1" x-text="'Date: ' + new Date().toLocaleDateString('en-IN')"></p>
+            <p class="text-stone-400" x-text="'Valid for: 15 Days'"></p>
+          </div>
+        </div>
+
+        <!-- Selected Configuration Summary -->
+        <div>
+          <h3 class="text-xs font-mono uppercase tracking-widest text-amber-500 mb-3">CONFIGURED SPECIFICATIONS & SELECTIONS</h3>
+          
+          <div class="grid grid-cols-2 gap-3 text-xs font-mono bg-stone-950/60 p-4 rounded border border-stone-800">
+            <div><span class="text-stone-400">Base Size:</span> <span class="text-stone-200" x-text="getSelectedLabel('size')"></span></div>
+            <div><span class="text-stone-400">Peak Height:</span> <span class="text-stone-200" x-text="getSelectedLabel('peakHeight')"></span></div>
+            <div><span class="text-stone-400">Bedrooms:</span> <span class="text-stone-200" x-text="getSelectedLabel('bedroom')"></span></div>
+            <div><span class="text-stone-400">Bathrooms:</span> <span class="text-stone-200" x-text="getSelectedLabel('bathroom')"></span></div>
+            <div><span class="text-stone-400">Exterior Wall:</span> <span class="text-stone-200" x-text="getSelectedLabel('exterior')"></span></div>
+            <div><span class="text-stone-400">Interior Paneling:</span> <span class="text-stone-200" x-text="getSelectedLabel('interior')"></span></div>
+            <div><span class="text-stone-400">Glass Façade:</span> <span class="text-stone-200" x-text="getSelectedLabel('glazing')"></span></div>
+            <div><span class="text-stone-400">Kitchenette:</span> <span class="text-stone-200" x-text="getSelectedLabel('kitchen')"></span></div>
+            <div><span class="text-stone-400">Furnishing:</span> <span class="text-stone-200" x-text="getSelectedLabel('furniture')"></span></div>
+            <div><span class="text-stone-400">Electrical:</span> <span class="text-stone-200" x-text="getSelectedLabel('electrical')"></span></div>
+          </div>
+        </div>
+
+        <!-- Pricing Financials Table -->
+        <div class="space-y-2 font-mono text-xs">
+          <div class="flex justify-between py-1.5 border-b border-stone-800">
+            <span class="text-stone-300">Base Structure & Framing:</span>
+            <span class="text-stone-200" x-text="formatINR(calculatedPrice.base)"></span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-stone-800">
+            <span class="text-stone-300">Custom Upgrades & Interior Packages:</span>
+            <span class="text-amber-400" x-text="'+' + formatINR(calculatedPrice.addons)"></span>
+          </div>
+          <div class="flex justify-between py-1.5 font-bold border-b border-stone-700 text-stone-100">
+            <span>Net Subtotal Amount:</span>
+            <span x-text="formatINR(calculatedPrice.subtotal)"></span>
+          </div>
+          <div class="flex justify-between py-1.5 text-stone-400 border-b border-stone-800">
+            <span>Integrated GST @ 18%:</span>
+            <span x-text="formatINR(calculatedPrice.gst)"></span>
+          </div>
+          <div class="flex justify-between py-3 text-base font-bold text-amber-400 bg-amber-950/20 px-3 rounded border border-amber-500/30">
+            <span>TOTAL ESTIMATED INVESTMENT:</span>
+            <span x-text="formatINR(calculatedPrice.total)"></span>
+          </div>
+        </div>
+
+        <!-- Terms Footer -->
+        <div class="text-[10px] text-stone-400 font-mono space-y-1 pt-4 border-t border-stone-800">
+          <p>1. Payment Schedule: 40% Advance, 50% Post Factory Inspection, 10% Upon Assembly Completion.</p>
+          <p>2. Site plinth & concrete foundations to be provided by client as per VANA FORM engineering drawings.</p>
+          <p>3. Issued by Pratyasa Interior, Ahmedabad, Gujarat, India.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- FOOTER -->
+  <footer class="bg-stone-950 border-t border-stone-800 py-12 text-stone-400 font-mono text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-serif font-bold text-stone-100">VANA FORM</span>
+        </div>
+        <p class="text-[10px] text-amber-500 uppercase tracking-widest mt-0.5">BY PRATYASA INTERIOR</p>
+        <p class="text-stone-400 mt-3 text-[11px] leading-relaxed">
+          Architectural Prefabricated Systems & Modular Living Structures designed and fabricated in Ahmedabad, Gujarat.
+        </p>
+      </div>
+
+      <div>
+        <span class="text-stone-200 uppercase tracking-widest font-semibold block mb-3">Quick Navigation</span>
+        <ul class="space-y-2">
+          <li><button @click="activeTab = 'products'" class="hover:text-amber-400">Prefab Catalog</button></li>
+          <li><button @click="activeTab = 'gallery'" class="hover:text-amber-400">Photo Gallery Tab</button></li>
+          <li><button @click="activeTab = 'configurator'" class="hover:text-amber-400">11-Step Estimator</button></li>
+          <li><button @click="activeTab = 'architecture'" class="hover:text-amber-400">Technical Spec</button></li>
+        </ul>
+      </div>
+
+      <div>
+        <span class="text-stone-200 uppercase tracking-widest font-semibold block mb-3">Head Office & Factory</span>
+        <p class="text-stone-400">Pratyasa Interior Works</p>
+        <p class="text-stone-400 mt-1" x-text="settings.location + ', India'"></p>
+        <p class="text-amber-400 mt-2" x-text="'WhatsApp: ' + settings.whatsapp"></p>
+      </div>
+
+      <div>
+        <span class="text-stone-200 uppercase tracking-widest font-semibold block mb-3">Updated Rates 2026</span>
+        <p class="text-[11px] text-stone-400 leading-relaxed">
+          All catalog products and options include the updated +10% rate calculation engine.
+        </p>
+        <div class="mt-4 pt-3 border-t border-stone-800 flex items-center justify-between text-[10px]">
+          <span>© 2026 VANA FORM</span>
+          <button @click="activeTab = 'admin'" class="text-amber-500 hover:underline">Admin Login</button>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+
+  <!-- APPLICATION ALPINE JS LOGIC ENGINE -->
+  <script>
+    function vanaApp() {
+      return {
+        activeTab: 'home',
+        adminSubTab: 'kpis',
+        mobileMenuOpen: false,
+        configStep: 1,
+        quoteModalOpen: false,
+        galleryModalOpen: false,
+        selectedGalleryItem: null,
+        activeQuoteRef: 'VANA/QTN/2026/' + Math.floor(1000 + Math.random() * 9000),
+
+        // Company settings
+        settings: {
+          companyName: 'VANA FORM',
+          subtitle: 'BY PRATYASA INTERIOR',
+          location: 'Ahmedabad, Gujarat',
+          whatsapp: '+919876543210',
+          gstPercent: 18
+        },
+
+        // Updated Products Catalog (+10% Rates Applied)
+        products: [
+          {
+            id: 'p1',
+            name: '300 SQ.FT A-Frame Prefab House',
+            category: 'A-Frame Series',
+            sizeSqft: 300,
+            startingPrice: 1314500, // Was ₹11,95,000 + 10%
+            pricePerSqft: 4380,
+            peakHeight: '16 FT',
+            layout: 'Studio + Mezzanine',
+            image: 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=800&q=80',
+            description: 'Our signature A-Frame structure with a heavy steel gable, full height glass front, insulated sandwich paneling, and teak finish floor.'
+          },
+          {
+            id: 'p2',
+            name: '400 SQ.FT Extended A-Frame Villa',
+            category: 'A-Frame Series',
+            sizeSqft: 400,
+            startingPrice: 1595000, // Was ₹14,50,000 + 10%
+            pricePerSqft: 3987,
+            peakHeight: '18 FT',
+            layout: '1 BHK + Mezzanine Loft',
+            image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
+            description: 'Expanded A-frame featuring ground floor living suite, kitchenette, bathroom, and upper mezzanine master bedroom with glass gable.'
+          },
+          {
+            id: 'p3',
+            name: 'Modular Forest Living Pod',
+            category: 'Prefab Pods',
+            sizeSqft: 250,
+            startingPrice: 715000, // Was ₹6,50,000 + 10%
+            pricePerSqft: 2860,
+            peakHeight: '11 FT Flat',
+            layout: 'Studio Suite',
+            image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80',
+            description: 'Compact modular pod engineered for rapid resort deployment. Completely factory finished and ready for crane placement.'
+          },
+          {
+            id: 'p4',
+            name: '600 SQ.FT 2-BHK Modular Villa',
+            category: 'Modular Homes',
+            sizeSqft: 600,
+            startingPrice: 2420000, // Was ₹22,00,000 + 10%
+            pricePerSqft: 4033,
+            peakHeight: '14 FT Dual Pitch',
+            layout: '2 BHK + Balcony Deck',
+            image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+            description: 'Luxury two bedroom modular residence with spacious living room, walk-in closets, dual bathrooms, and covered deck.'
+          }
+        ],
+
+        // Active Configurator Selections
+        configSelection: {
+          size: 's300',
+          peakHeight: 'h16',
+          bedroom: 'b1',
+          bathroom: 'bath1',
+          exterior: 'ex1',
+          interior: 'in1',
+          glazing: 'gl1',
+          kitchen: 'k1',
+          sanitary: 'san1',
+          electrical: 'el1',
+          furniture: 'f0'
+        },
+
+        // Configurator Options Schedule (+10% Applied across all options)
+        configOptions: {
+          size: [
+            { id: 's300', label: '300 SQ.FT A-Frame', sqft: 300, basePrice: 1314500, ratePerSqft: 4380, desc: 'Compact luxury cabin' },
+            { id: 's400', label: '400 SQ.FT A-Frame', sqft: 400, basePrice: 1595000, ratePerSqft: 3987, desc: '1-BHK with mezzanine' },
+            { id: 's500', label: '500 SQ.FT Executive', sqft: 500, basePrice: 1980000, ratePerSqft: 3960, desc: 'Expanded living & kitchen' },
+            { id: 's600', label: '600 SQ.FT 2-BHK Villa', sqft: 600, basePrice: 2420000, ratePerSqft: 4033, desc: 'Dual bedroom estate model' }
+          ],
+          peakHeight: [
+            { id: 'h14', label: '14 FT Standard Peak', priceAdd: 0, desc: 'Single level comfort height' },
+            { id: 'h16', label: '16 FT High Peak', priceAdd: 71500, desc: 'Enables mezzanine sleeping loft' },
+            { id: 'h18', label: '18 FT Loft Peak', priceAdd: 132000, desc: 'Dramatic front glass façade' },
+            { id: 'h20', label: '20 FT Grand Peak', priceAdd: 198000, desc: 'Full two level ceiling clearance' }
+          ],
+          bedroom: [
+            { id: 'bStudio', label: 'Open Studio Layout', priceAdd: 0, desc: 'Combined living & sleeping' },
+            { id: 'b1', label: '1 BHK + Mezzanine', priceAdd: 110000, desc: 'Ground suite + loft bed' },
+            { id: 'b2', label: '2 BHK Private Rooms', priceAdd: 220000, desc: 'Separate partitioned bedrooms' }
+          ],
+          bathroom: [
+            { id: 'bath1', label: '1 En-Suite Bathroom', priceAdd: 0, desc: 'Complete tiled bathroom' },
+            { id: 'bath2', label: '2 Bathrooms', priceAdd: 132000, desc: 'Primary + Guest Powder room' }
+          ],
+          exterior: [
+            { id: 'ex1', label: 'Standard Metal Cladding', priceAdd: 0, desc: 'Corrosion resistant zinc steel' },
+            { id: 'ex2', label: 'Standing Seam Charcoal', priceAdd: 93500, desc: 'Modern seamless architectural roof' },
+            { id: 'ex3', label: 'Composite Wood & Metal Mix', priceAdd: 165000, desc: 'Warm natural timber exterior accents' }
+          ],
+          interior: [
+            { id: 'in1', label: 'Standard Cement Board', priceAdd: 0, desc: 'Smooth painted walls' },
+            { id: 'in2', label: 'Pine Wood Paneling', priceAdd: 143000, desc: 'Acoustic warm pine lining' },
+            { id: 'in3', label: 'Luxury Oak & Veneer', priceAdd: 264000, desc: 'Handcrafted premium architectural finish' }
+          ],
+          glazing: [
+            { id: 'gl1', label: 'Double Glazed Toughened', priceAdd: 0, desc: 'Standard thermal insulation' },
+            { id: 'gl2', label: 'Low-E Acoustic Thermal Glass', priceAdd: 121000, desc: 'Maximum UV block & sound dampening' }
+          ],
+          kitchen: [
+            { id: 'k0', label: 'No Kitchen', priceAdd: 0, desc: 'Space left open' },
+            { id: 'k1', label: 'Basic Modular Kitchenette', priceAdd: 132000, desc: 'Sink, quartz top & cabinets' },
+            { id: 'k2', label: 'Premium Island Kitchen', priceAdd: 242000, desc: 'Integrated hob, chimney & breakfast counter' }
+          ],
+          sanitary: [
+            { id: 'san1', label: 'Standard Sanitaryware', priceAdd: 0, desc: 'Quality wall hung WC & shower' },
+            { id: 'san2', label: 'Designer Matt Black Fittings', priceAdd: 77000, desc: 'Thermostatic diverter & glass partition' }
+          ],
+          electrical: [
+            { id: 'el1', label: 'Basic Wiring & Distribution', priceAdd: 0, desc: 'Modular switches & LED cutouts' },
+            { id: 'el2', label: 'Smart Automation + AC Ready', priceAdd: 99000, desc: 'App light control & dual AC copper lines' }
+          ],
+          furniture: [
+            { id: 'f0', label: 'Unfurnished Structure', priceAdd: 0, desc: 'Ready for client furniture' },
+            { id: 'f1', label: 'Soft Furnishings Package', priceAdd: 165000, desc: 'Curtains, bed frame & lighting fixtures' },
+            { id: 'f2', label: 'Turnkey Resort Furnishing', priceAdd: 385000, desc: 'Fully fitted sofas, mattress, wardrobes & decor' }
+          ]
+        },
+
+        // Calculated Prices State
+        calculatedPrice: {
+          base: 1314500,
+          addons: 0,
+          subtotal: 1314500,
+          gst: 236610,
+          total: 1551110
+        },
+
+        // Gallery Categories & Database Items
+        activeGalleryCat: 'All',
+        galleryCategories: ['All', 'A-Frame', 'Pods', 'Modular Homes', 'Interior'],
+        galleryItems: [
+          { id: 1, title: '300 SQ.FT A-Frame Structure', category: 'A-Frame', location: 'Lonavala Site', caption: 'Heavy-duty steel skeleton with full-height front double glazed glass façade.', image: 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=1200&q=80' },
+          { id: 2, title: 'Modular Forest Living Pod', category: 'Pods', location: 'Udaipur Resort', caption: 'Factory prefabricated pod featuring standing seam metal roof and timber deck.', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80' },
+          { id: 3, title: '2 BHK Modern Modular Home', category: 'Modular Homes', location: 'Ahmedabad', caption: 'Expanded modular residence with private terrace and composite cladding.', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80' },
+          { id: 4, title: 'A-Frame Interior Master Suite', category: 'Interior', location: 'Gir Forest', caption: 'Warm natural pine wall lining, ambient cove lighting, and mezzanine bed.', image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80' },
+          { id: 5, title: 'Eco Resort Cottage Complex', category: 'A-Frame', location: 'Coorg', caption: 'Cluster of 6 A-frame structures assembled in 35 days.', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80' },
+          { id: 6, title: 'Modular Kitchenette Assembly', category: 'Interior', location: 'Factory Workshop', caption: 'Precision engineered quartz countertop and seamless cabinetry.', image: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80' }
+        ],
+
+        // Mock CRM Leads
+        mockLeads: [
+          { id: 101, ref: 'VANA/QTN/2026/4102', name: 'Rajesh Patel', location: 'Surat, Gujarat', structure: '400 SQ.FT A-Frame', amount: 1882100, status: 'Approved' },
+          { id: 102, ref: 'VANA/QTN/2026/8831', name: 'Ananya Sharma', location: 'Udaipur, RJ', structure: '300 SQ.FT A-Frame', amount: 1551110, status: 'Quote Sent' },
+          { id: 103, ref: 'VANA/QTN/2026/9120', name: 'Vikramaditya Resort', location: 'Goa', structure: '600 SQ.FT Villa (x3)', amount: 8560000, status: 'Contacted' }
+        ],
+
+        // SQL Schema Code string for Tech Spec tab
+        sqlSchemaCode: `-- Supabase PostgreSQL Schema for VANA FORM
+CREATE TABLE IF NOT EXISTS website_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_name TEXT NOT NULL DEFAULT 'VANA FORM',
+  subtitle TEXT DEFAULT 'BY PRATYASA INTERIOR',
+  location TEXT DEFAULT 'Ahmedabad, Gujarat',
+  whatsapp TEXT DEFAULT '+919876543210',
+  gst_percent NUMERIC DEFAULT 18,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  size_sqft INT NOT NULL,
+  starting_price NUMERIC NOT NULL,
+  price_per_sqft NUMERIC NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE website_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Read Access" ON products FOR SELECT USING (true);
+CREATE POLICY "Admin Full Access" ON products FOR ALL USING (auth.role() = 'authenticated');`,
+
+        // Methods & Helper Functions
+        initApp() {
+          this.recalculateTotal();
+        },
+
+        get filteredGallery() {
+          if (this.activeGalleryCat === 'All') return this.galleryItems;
+          return this.galleryItems.filter(item => item.category === this.activeGalleryCat);
+        },
+
+        openGalleryModal(item) {
+          this.selectedGalleryItem = item;
+          this.galleryModalOpen = true;
+        },
+
+        startCustomizing(product) {
+          // Find matching size option
+          if (product.sizeSqft === 300) this.configSelection.size = 's300';
+          if (product.sizeSqft === 400) this.configSelection.size = 's400';
+          if (product.sizeSqft === 500) this.configSelection.size = 's500';
+          if (product.sizeSqft === 600) this.configSelection.size = 's600';
+          
+          this.recalculateTotal();
+          this.activeTab = 'configurator';
+          this.configStep = 1;
+        },
+
+        recalculateTotal() {
+          // Get selected base size price
+          const sizeObj = this.configOptions.size.find(o => o.id === this.configSelection.size);
+          const base = sizeObj ? sizeObj.basePrice : 1314500;
+
+          // Add up all step addons
+          let addons = 0;
+          addons += (this.configOptions.peakHeight.find(o => o.id === this.configSelection.peakHeight)?.priceAdd || 0);
+          addons += (this.configOptions.bedroom.find(o => o.id === this.configSelection.bedroom)?.priceAdd || 0);
+          addons += (this.configOptions.bathroom.find(o => o.id === this.configSelection.bathroom)?.priceAdd || 0);
+          addons += (this.configOptions.exterior.find(o => o.id === this.configSelection.exterior)?.priceAdd || 0);
+          addons += (this.configOptions.interior.find(o => o.id === this.configSelection.interior)?.priceAdd || 0);
+          addons += (this.configOptions.glazing.find(o => o.id === this.configSelection.glazing)?.priceAdd || 0);
+          addons += (this.configOptions.kitchen.find(o => o.id === this.configSelection.kitchen)?.priceAdd || 0);
+          addons += (this.configOptions.sanitary.find(o => o.id === this.configSelection.sanitary)?.priceAdd || 0);
+          addons += (this.configOptions.electrical.find(o => o.id === this.configSelection.electrical)?.priceAdd || 0);
+          addons += (this.configOptions.furniture.find(o => o.id === this.configSelection.furniture)?.priceAdd || 0);
+
+          const subtotal = base + addons;
+          const gst = Math.round(subtotal * (this.settings.gstPercent / 100));
+          const total = subtotal + gst;
+
+          this.calculatedPrice = { base, addons, subtotal, gst, total };
+        },
+
+        getSelectedLabel(category) {
+          const selectedId = this.configSelection[category];
+          const option = this.configOptions[category]?.find(o => o.id === selectedId);
+          return option ? option.label : 'Standard';
+        },
+
+        formatINR(amount) {
+          return '₹' + Number(amount || 0).toLocaleString('en-IN');
+        },
+
+        generateQuotationModal() {
+          this.activeQuoteRef = 'VANA/QTN/2026/' + Math.floor(1000 + Math.random() * 9000);
+          this.quoteModalOpen = true;
+        },
+
+        printQuotation() {
+          window.print();
+        },
+
+        getWhatsAppQuoteLink() {
+          const sizeLabel = this.getSelectedLabel('size');
+          const totalText = this.formatINR(this.calculatedPrice.total);
+          const msg = `Hello VANA FORM by Pratyasa Interior team,\nI generated an estimated quotation for ${sizeLabel}.\nTotal Estimate: ${totalText} (incl. 18% GST).\nPlease connect me with an architectural engineer for site verification.`;
+          return 'https://wa.me/' + this.settings.whatsapp + '?text=' + encodeURIComponent(msg);
+        },
+
+        openWhatsAppForLead(lead) {
+          const msg = `Hello ${lead.name},\nFollowing up on your VANA FORM quote ${lead.ref} for ${lead.structure} (${this.formatINR(lead.amount)}).`;
+          window.open('https://wa.me/' + this.settings.whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
+        },
+
+        copySQLSchema() {
+          navigator.clipboard.writeText(this.sqlSchemaCode);
+          alert('PostgreSQL Schema copied to clipboard!');
+        },
+
+        showToast(msg) {
+          alert(msg);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
